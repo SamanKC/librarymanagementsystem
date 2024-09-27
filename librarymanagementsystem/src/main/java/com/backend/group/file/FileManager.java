@@ -16,6 +16,8 @@ public abstract class FileManager {
     public FileManager(String bookFile) {
         String projectDir = System.getProperty("user.dir");
         this.bookFile = projectDir + "/librarymanagementsystem/src/main/java/com/backend/group/output/" + bookFile;
+        this.reportFile = projectDir + "/librarymanagementsystem/src/main/java/com/backend/group/output/report.txt";
+        this.outputFile = projectDir + "/librarymanagementsystem/src/main/java/com/backend/group/output/output.txt";
     }
 
     protected void ensureFileAndDirectoryExists(String filePath) throws IOException {
@@ -50,7 +52,7 @@ public abstract class FileManager {
     // Update this part in FileManager class
     public void saveLibraryData(List<Book> books) {
         // Save the library data to output.txt
-        File file = new File("output.txt");
+        File file = new File(outputFile);
 
         try {
             ensureFileAndDirectoryExists(file.getPath());
@@ -78,7 +80,7 @@ public abstract class FileManager {
     }
 
     public void saveQueryResults(String instruction, List<Book> results) {
-        File file = new File("report.txt");
+        File file = new File(reportFile);
 
         // Try-with-resources to ensure the writer is closed automatically
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
@@ -87,7 +89,11 @@ public abstract class FileManager {
                 System.out.println("Report file created: " + reportFile);
             }
 
-            // Write the query instruction and a separator
+            // Write a separator for clarity
+            writer.write("---------------------------------");
+            writer.newLine();
+
+            // Write the query instruction
             writer.write("Query: " + instruction);
             writer.newLine();
             writer.write("---------------------------------");
@@ -105,9 +111,10 @@ public abstract class FileManager {
                 }
             }
 
-            // Append a dashed line to separate from the next query results
+            // Final separator
             writer.write("---------------------------------");
             writer.newLine();
+
             System.out.println("Query results successfully appended to " + reportFile);
         } catch (IOException e) {
             System.err.println("Error writing to report file: " + e.getMessage());
@@ -115,49 +122,51 @@ public abstract class FileManager {
     }
 
     // private void writeBooksToFile(List<Book> books, String filePath) {
-    //     try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-    //         for (Book book : books) {
-    //             writer.write("Title: " + book.getTitle());
-    //             writer.newLine();
-    //             writer.write("Author: " + book.getAuthor());
-    //             writer.newLine();
-    //             writer.write("ISBN: " + book.getIsbn());
-    //             writer.newLine();
-    //             writer.write("Genre: " + book.getGenre());
-    //             writer.newLine();
-    //             writer.write("Year: " + book.getYear());
-    //             writer.newLine();
-    //             writer.newLine();
-    //         }
-    //     } catch (IOException e) {
-    //         System.err.println("Error writing to book file: " + e.getMessage());
-    //     }
+    // try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+    // for (Book book : books) {
+    // writer.write("Title: " + book.getTitle());
+    // writer.newLine();
+    // writer.write("Author: " + book.getAuthor());
+    // writer.newLine();
+    // writer.write("ISBN: " + book.getIsbn());
+    // writer.newLine();
+    // writer.write("Genre: " + book.getGenre());
+    // writer.newLine();
+    // writer.write("Year: " + book.getYear());
+    // writer.newLine();
+    // writer.newLine();
+    // }
+    // } catch (IOException e) {
+    // System.err.println("Error writing to book file: " + e.getMessage());
+    // }
     // }
 
     // public void saveQueryResults(String instruction, List<Book> results) {
-    //     try {
-    //         ensureFileAndDirectoryExists(reportFile);
-    //         appendQueryResultsToFile(instruction, results, reportFile);
-    //     } catch (IOException e) {
-    //         System.err.println("Error ensuring report file exists: " + e.getMessage());
-    //     }
+    // try {
+    // ensureFileAndDirectoryExists(reportFile);
+    // appendQueryResultsToFile(instruction, results, reportFile);
+    // } catch (IOException e) {
+    // System.err.println("Error ensuring report file exists: " + e.getMessage());
+    // }
     // }
 
-    // private void appendQueryResultsToFile(String instruction, List<Book> results, String filePath) {
-    //     try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // Append to the file
-    //         writer.write("Query: " + instruction);
-    //         writer.newLine();
-    //         writer.write("---------------------------------");
-    //         writer.newLine();
-    //         for (Book book : results) {
-    //             writer.write(book.toString());
-    //             writer.newLine();
-    //             writer.newLine();
-    //         }
-    //         writer.write("---------------------------------");
-    //         writer.newLine();
-    //     } catch (IOException e) {
-    //         System.err.println("Error writing to report file: " + e.getMessage());
-    //     }
+    // private void appendQueryResultsToFile(String instruction, List<Book> results,
+    // String filePath) {
+    // try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath,
+    // true))) { // Append to the file
+    // writer.write("Query: " + instruction);
+    // writer.newLine();
+    // writer.write("---------------------------------");
+    // writer.newLine();
+    // for (Book book : results) {
+    // writer.write(book.toString());
+    // writer.newLine();
+    // writer.newLine();
+    // }
+    // writer.write("---------------------------------");
+    // writer.newLine();
+    // } catch (IOException e) {
+    // System.err.println("Error writing to report file: " + e.getMessage());
+    // }
     // }
 }

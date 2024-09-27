@@ -41,12 +41,31 @@ public class Library {
     public List<Book> queryBooks(String criteria, String value) {
         List<Book> result = new ArrayList<>();
         for (Book book : books) {
-            if (matchesCriteria(book, criteria, value)) {
-                result.add(book);
+            switch (criteria.toLowerCase()) {
+                case "title":
+                    if (book.getTitle().equalsIgnoreCase(value)) {
+                        result.add(book);
+                    }
+                    break;
+                case "author":
+                    if (book.getAuthor().equalsIgnoreCase(value)) {
+                        result.add(book);
+                    }
+                    break;
+                case "genre":
+                    if (book.getGenre().equalsIgnoreCase(value)) {
+                        result.add(book);
+                    }
+                    break;
+                case "isbn":
+                    if (book.getIsbn().equals(value)) {
+                        result.add(book);
+                    }
+                    break;
+                default:
+                    System.err.println("Warning: Invalid query criteria - " + criteria);
+                    return result; // Return an empty result list for invalid criteria
             }
-        }
-        if (result.isEmpty()) {
-            System.err.println("Warning: No books found for query: " + criteria + " = " + value);
         }
         return result;
     }
