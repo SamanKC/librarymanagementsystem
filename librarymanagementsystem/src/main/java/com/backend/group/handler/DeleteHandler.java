@@ -13,13 +13,26 @@ public class DeleteHandler extends InstructionHandler {
     public void handleInstruction(String instruction) {
         try {
             String[] parts = instruction.split(" ");
-            if (parts[1].equalsIgnoreCase("title")) {
-                String title = instruction.substring(instruction.indexOf(parts[2])).trim();
-                library.deleteBookByTitle(title);
-            } else if (parts[1].equalsIgnoreCase("isbn")) {
-                String isbn = parts[2];
-                library.deleteBookByIsbn(isbn);
+            if (parts.length < 3) {
+                System.err.println("Error processing 'delete' instruction: Missing required arguments.");
+                return;
             }
+
+            String actionType = parts[1].toLowerCase();
+            String identifier = instruction.substring(instruction.indexOf(parts[2])).trim();
+
+            switch (actionType) {
+                case "title":
+                    library.deleteBookByTitle(identifier);
+                    break;
+                case "isbn":
+                    library.deleteBookByIsbn(parts[2]);
+                    break;
+                default:
+                    System.err.println("Error processing 'delete' instruction: Invalid field specified.");
+                    return;
+            }
+
             fileManager.saveLibraryData(library.getBooks());
             System.out.println("Record deleted successfully.");
         } catch (Exception e) {

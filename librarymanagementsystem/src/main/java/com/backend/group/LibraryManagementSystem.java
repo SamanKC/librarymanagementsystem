@@ -13,36 +13,43 @@ public class LibraryManagementSystem {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Prompt user for file names
-        System.out.print("Enter the name of the initial book records file (e.g., books.txt): ");
-        String bookFile = scanner.nextLine();
-
-        System.out.print("Enter the name of the instructions file (e.g., instructions.txt): ");
-        String instructionFile = scanner.nextLine();
-
-        System.out.print("Enter the name for the output file (e.g., output.txt): ");
-        String outputFile = scanner.nextLine();
-
-        System.out.print("Enter the name for the report file (e.g., report.txt): ");
-        String reportFile = scanner.nextLine();
+        // Get the book and instruction filenames from the user
+        String bookFile = getFileName(scanner, "initial book records file", "books");
+        String instructionFile = getFileName(scanner, "instructions file", "instructions");
 
         Library library = new Library();
-        DefaultFileManager fileManager = new DefaultFileManager(bookFile, outputFile, reportFile);
+        
+        DefaultFileManager fileManager = new DefaultFileManager(bookFile);
 
-        // Handlers
+        // Initialize the handlers for different operations
         AddHandler addHandler = new AddHandler(library, fileManager);
         DeleteHandler deleteHandler = new DeleteHandler(library, fileManager);
         QueryHandler queryHandler = new QueryHandler(library, fileManager);
 
+        // Set up the instruction parser with the handlers
         InstructionParser instructionParser = new InstructionParser(addHandler, deleteHandler, queryHandler);
 
-        // Load initial data
+        // Load initial data from the specified file
         fileManager.loadInitialData(library);
 
-        // Parse and execute instructions
+        // Parse and execute instructions from the instruction file
         instructionParser.parseInstructions(instructionFile);
 
         scanner.close();
     }
-}
 
+    // Method to prompt for file name input and return the full file name with .txt
+    // extension
+    // If no input is given, use the default name provided
+    private static String getFileName(Scanner scanner, String prompt, String defaultName) {
+        System.out.print("Enter the name of the " + prompt + " (without .txt extension, e.g., books) [default: "
+                + defaultName + "]: ");
+
+        String input = scanner.nextLine().trim();
+        if (input.isEmpty()) {
+            return defaultName + ".txt"; // Use default name if input is empty
+        }
+
+        return input + ".txt"; // Append .txt extension
+    }
+}

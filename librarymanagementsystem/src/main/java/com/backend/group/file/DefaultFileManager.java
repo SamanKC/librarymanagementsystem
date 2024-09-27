@@ -4,12 +4,11 @@ import com.backend.group.model.Book;
 import com.backend.group.model.Library;
 
 import java.io.*;
-import java.util.List;
 
 public class DefaultFileManager extends FileManager {
 
-    public DefaultFileManager(String bookFile, String outputFile, String reportFile) {
-        super(bookFile, outputFile, reportFile);
+    public DefaultFileManager(String bookFile) {
+        super(bookFile);
     }
 
     @Override
@@ -18,7 +17,7 @@ public class DefaultFileManager extends FileManager {
 
         try {
             // Ensure the file exists (create if necessary)
-            ensureFileExists(file);
+            ensureFileAndDirectoryExists(bookFile);
 
             // Now load the initial data from the file
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -26,38 +25,55 @@ public class DefaultFileManager extends FileManager {
                 String title = null, author = null, isbn = null, genre = null;
                 int year = 0;
 
+                System.out.println("Reading books: ");
                 while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
                     if (line.trim().isEmpty()) {
+                        // If we encounter an empty line, create a book if we have a title
                         if (title != null) {
                             Book book = new Book(title, author, isbn, genre, year);
                             library.addOrUpdateBook(book);
+                            // Print the book details to the terminal
+                            System.out.println("Loaded Book:");
+                            System.out.println(book);
+                            System.out.println(); // Add a blank line for better readability
+                            // Reset for next book
                             title = author = isbn = genre = null;
                             year = 0;
                         }
-                        continue;
+                        continue; // Skip the empty line
                     }
 
-                    if (line.startsWith("Title: ")) {
-                        title = line.split(": ")[1].trim();
-                    } else if (line.startsWith("Author: ")) {
-                        author = line.split(": ")[1].trim();
-                    } else if (line.startsWith("ISBN: ")) {
-                        isbn = line.split(": ")[1].trim();
-                    } else if (line.startsWith("Genre: ")) {
-                        genre = line.split(": ")[1].trim();
-                    } else if (line.startsWith("Year: ")) {
-                        try {
-                            year = Integer.parseInt(line.split(": ")[1].trim());
-                        } catch (NumberFormatException e) {
-                            System.err.println("Error parsing year for title '" + title + "': " + e.getMessage());
+                    // Split based on ';'
+                    String[] parts = line.split(";");
+                    for (String part : parts) {
+                        part = part.trim();
+                        if (part.startsWith("title ")) {
+                            title = part.substring("title ".length()).trim();
+                        } else if (part.startsWith("author ")) {
+                            author = part.substring("author ".length()).trim();
+                        } else if (part.startsWith("ISBN ")) {
+                            isbn = part.substring("ISBN ".length()).trim();
+                        } else if (part.startsWith("genre ")) {
+                            genre = part.substring("genre ".length()).trim();
+                        } else if (part.startsWith("year ")) {
+                            try {
+                                year = Integer.parseInt(part.substring("year ".length()).trim());
+                            } catch (NumberFormatException e) {
+                                System.err.println("Error parsing year for title '" + title + "': " + e.getMessage());
+                            }
                         }
                     }
                 }
 
-                // Add the last book (if any) to the library
+                // Handle the last book in the file if not already added
                 if (title != null) {
                     Book book = new Book(title, author, isbn, genre, year);
                     library.addOrUpdateBook(book);
+                    // Print the last book details to the terminal
+                    System.out.println("Loaded Book:");
+                    System.out.println(book);
+                    System.out.println(); // Add a blank line for better readability
                 }
 
             } catch (IOException e) {
@@ -69,55 +85,4 @@ public class DefaultFileManager extends FileManager {
         }
     }
 
-    @Override
-    public void saveLibraryData(List<Book> books) {
-        File file = new File(outputFile);
-
-        try {
-            // Ensure the file exists (create if necessary)
-            ensureFileExists(file);
-
-            // Write library data to the file
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (Book book : books) {
-                    writer.write(book.toString());
-                    writer.newLine();
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                System.err.println("Error writing to output file: " + e.getMessage());
-            }
-
-        } catch (IOException e) {
-            System.err.println("Error ensuring file exists: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void saveQueryResults(String instruction, List<Book> results) {
-        File file = new File(reportFile);
-
-        try {
-            // Ensure the file exists (create if necessary)
-            ensureFileExists(file);
-
-            // Write query results to the report file
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-                writer.write("Query: " + instruction);
-                writer.newLine();
-                writer.write("---------------------------------");
-                writer.newLine();
-                for (Book book : results) {
-                    writer.write(book.toString());
-                    writer.newLine();
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                System.err.println("Error writing to report file: " + e.getMessage());
-            }
-
-        } catch (IOException e) {
-            System.err.println("Error ensuring file exists: " + e.getMessage());
-        }
-    }
 }

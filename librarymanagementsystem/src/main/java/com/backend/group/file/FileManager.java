@@ -5,34 +5,159 @@ import com.backend.group.model.Library;
 
 import java.io.*;
 import java.util.List;
+import java.util.Scanner;
 
-// Abstract class defining common methods for file operations
 public abstract class FileManager {
     protected String bookFile;
     protected String outputFile;
     protected String reportFile;
+    protected String instructionFile;
 
-    public FileManager(String bookFile, String outputFile, String reportFile) {
-        this.bookFile = (bookFile != null && !bookFile.isEmpty()) ? bookFile : "/librarymanagementsystem/src/main/java/com/backend/group/output/output/books.txt"; // Default book file
-        this.outputFile = (outputFile != null && !outputFile.isEmpty()) ? outputFile : "/librarymanagementsystem/src/main/java/com/backend/group/output/output.txt"; 
-        this.reportFile = (reportFile != null && !reportFile.isEmpty()) ? reportFile : "/librarymanagementsystem/src/main/java/com/backend/group/output/report.txt"; 
+    public FileManager(String bookFile) {
+        String projectDir = System.getProperty("user.dir");
+        this.bookFile = projectDir + "/librarymanagementsystem/src/main/java/com/backend/group/output/" + bookFile;
     }
 
-    // Abstract methods to be implemented by child classes
-    public abstract void loadInitialData(Library library);
+    protected void ensureFileAndDirectoryExists(String filePath) throws IOException {
+        File file = new File(filePath);
+        File parentDir = file.getParentFile();
 
-    public abstract void saveLibraryData(List<Book> books);
+        // Ensure parent directory exists
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+            System.out.println("Output directory created: " + parentDir.getAbsolutePath());
+        }
 
-    public abstract void saveQueryResults(String instruction, List<Book> results);
-
-    // Utility method to ensure the existence of a file, creating it if necessary
-    protected void ensureFileExists(File file) throws IOException {
+        // Ensure file exists, prompting for a new name if not
         if (!file.exists()) {
-            if (file.getParentFile() != null) {
-                file.getParentFile().mkdirs(); // Ensure directories exist
-            }
-            file.createNewFile();
-            System.out.println("File not found, created new file: " + file.getAbsolutePath());
+            file = createNewFile(parentDir);
         }
     }
+
+    private File createNewFile(File parentDir) throws IOException {
+        System.out.print("File not found. Please enter a name for the file to create (without extension): ");
+        Scanner scanner = new Scanner(System.in);
+        String newFileName = scanner.nextLine().trim();
+
+        File newFile = new File(parentDir, newFileName + ".txt");
+        newFile.createNewFile();
+        System.out.println("File created: " + newFile.getAbsolutePath());
+        return newFile;
+    }
+
+    public abstract void loadInitialData(Library library);
+
+    // Update this part in FileManager class
+    public void saveLibraryData(List<Book> books) {
+        // Save the library data to output.txt
+        File file = new File("output.txt");
+
+        try {
+            ensureFileAndDirectoryExists(file.getPath());
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                for (Book book : books) {
+                    writer.write("Title: " + book.getTitle());
+                    writer.newLine();
+                    writer.write("Author: " + book.getAuthor());
+                    writer.newLine();
+                    writer.write("ISBN: " + book.getIsbn());
+                    writer.newLine();
+                    writer.write("Genre: " + book.getGenre());
+                    writer.newLine();
+                    writer.write("Year: " + book.getYear());
+                    writer.newLine();
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.err.println("Error writing to output file: " + e.getMessage());
+            }
+        } catch (IOException e) {
+            System.err.println("Error ensuring output file exists: " + e.getMessage());
+        }
+    }
+
+    public void saveQueryResults(String instruction, List<Book> results) {
+        File file = new File("report.txt");
+
+        // Try-with-resources to ensure the writer is closed automatically
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+            // Create the report file if it doesn't exist
+            if (file.createNewFile()) {
+                System.out.println("Report file created: " + reportFile);
+            }
+
+            // Write the query instruction and a separator
+            writer.write("Query: " + instruction);
+            writer.newLine();
+            writer.write("---------------------------------");
+            writer.newLine();
+
+            // Write the results
+            if (results.isEmpty()) {
+                writer.write("No books found for this query.");
+                writer.newLine();
+            } else {
+                for (Book book : results) {
+                    writer.write(book.toString());
+                    writer.newLine();
+                    writer.newLine(); // Extra line for spacing
+                }
+            }
+
+            // Append a dashed line to separate from the next query results
+            writer.write("---------------------------------");
+            writer.newLine();
+            System.out.println("Query results successfully appended to " + reportFile);
+        } catch (IOException e) {
+            System.err.println("Error writing to report file: " + e.getMessage());
+        }
+    }
+
+    // private void writeBooksToFile(List<Book> books, String filePath) {
+    //     try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+    //         for (Book book : books) {
+    //             writer.write("Title: " + book.getTitle());
+    //             writer.newLine();
+    //             writer.write("Author: " + book.getAuthor());
+    //             writer.newLine();
+    //             writer.write("ISBN: " + book.getIsbn());
+    //             writer.newLine();
+    //             writer.write("Genre: " + book.getGenre());
+    //             writer.newLine();
+    //             writer.write("Year: " + book.getYear());
+    //             writer.newLine();
+    //             writer.newLine();
+    //         }
+    //     } catch (IOException e) {
+    //         System.err.println("Error writing to book file: " + e.getMessage());
+    //     }
+    // }
+
+    // public void saveQueryResults(String instruction, List<Book> results) {
+    //     try {
+    //         ensureFileAndDirectoryExists(reportFile);
+    //         appendQueryResultsToFile(instruction, results, reportFile);
+    //     } catch (IOException e) {
+    //         System.err.println("Error ensuring report file exists: " + e.getMessage());
+    //     }
+    // }
+
+    // private void appendQueryResultsToFile(String instruction, List<Book> results, String filePath) {
+    //     try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // Append to the file
+    //         writer.write("Query: " + instruction);
+    //         writer.newLine();
+    //         writer.write("---------------------------------");
+    //         writer.newLine();
+    //         for (Book book : results) {
+    //             writer.write(book.toString());
+    //             writer.newLine();
+    //             writer.newLine();
+    //         }
+    //         writer.write("---------------------------------");
+    //         writer.newLine();
+    //     } catch (IOException e) {
+    //         System.err.println("Error writing to report file: " + e.getMessage());
+    //     }
+    // }
 }
