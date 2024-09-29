@@ -70,23 +70,6 @@ public class Library {
         return result;
     }
 
-    // Helper method to match criteria against a book
-    private boolean matchesCriteria(Book book, String criteria, String value) {
-        switch (criteria.toLowerCase()) {
-            case "title":
-                return book.getTitle().equalsIgnoreCase(value);
-            case "author":
-                return book.getAuthor().equalsIgnoreCase(value);
-            case "genre":
-                return book.getGenre().equalsIgnoreCase(value);
-            case "isbn":
-                return book.getIsbn().equals(value);
-            default:
-                System.err.println("Warning: Invalid query criteria - " + criteria);
-                return false;
-        }
-    }
-
     // Returns the list of all books in the library
     public List<Book> getBooks() {
         return new ArrayList<>(books); // Return a copy to prevent external modification

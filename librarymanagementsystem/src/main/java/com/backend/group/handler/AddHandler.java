@@ -45,6 +45,7 @@ public class AddHandler extends InstructionHandler {
           fileManager.saveLibraryData(library.getBooks());
 
             System.out.println("Record added/updated successfully.");
+            fileManager.logMessage("Record added/updated successfully");
         } catch (Exception e) {
             System.err.println("Error processing 'add' instruction: " + e.getMessage());
         }

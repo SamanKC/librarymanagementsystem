@@ -7,6 +7,7 @@ import com.backend.group.handler.DeleteHandler;
 import com.backend.group.handler.QueryHandler;
 import com.backend.group.model.Library;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class LibraryManagementSystem {
@@ -18,7 +19,7 @@ public class LibraryManagementSystem {
         String instructionFile = getFileName(scanner, "instructions file", "instructions");
 
         Library library = new Library();
-        
+
         DefaultFileManager fileManager = new DefaultFileManager(bookFile);
 
         // Initialize the handlers for different operations
@@ -27,9 +28,12 @@ public class LibraryManagementSystem {
         QueryHandler queryHandler = new QueryHandler(library, fileManager);
 
         // Set up the instruction parser with the handlers
-        InstructionParser instructionParser = new InstructionParser(addHandler, deleteHandler, queryHandler);
+        InstructionParser instructionParser = new InstructionParser(addHandler, deleteHandler, queryHandler,
+                fileManager,
+                library);
 
         // Load initial data from the specified file
+
         fileManager.loadInitialData(library);
 
         // Parse and execute instructions from the instruction file

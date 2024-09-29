@@ -16,14 +16,18 @@ public class QueryHandler extends InstructionHandler {
     public void handleInstruction(String instruction) {
         try {
             if (!instruction.startsWith("query")) {
-                System.err.println("Error processing 'query' instruction: Invalid format.");
+                String errorMessage = "Error processing 'query' instruction: Invalid format.";
+                System.err.println(errorMessage);
+                fileManager.logMessage(errorMessage);
                 return;
             }
 
             // Split the instruction
             String[] parts = instruction.split(" ");
             if (parts.length < 3) {
-                System.err.println("Error processing 'query' instruction: Invalid format, not enough parts.");
+                String errorMessage = "Error processing 'query' instruction: Missing criteria and value.";
+                System.err.println(errorMessage);
+                fileManager.logMessage(errorMessage);
                 return;
             }
 
@@ -46,10 +50,10 @@ public class QueryHandler extends InstructionHandler {
 
             if (results.isEmpty()) {
                 System.err.println("Warning: No books found for query: " + criteria + " = " + value);
+                fileManager.logMessage("Warning: No books found for query: " + criteria + " = " + value);
             }
         } catch (Exception e) {
             System.err.println("Error processing 'query' instruction: " + e.getMessage());
-            e.printStackTrace(); // Print the stack trace for better debugging
         }
     }
 

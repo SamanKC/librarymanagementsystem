@@ -35,6 +35,7 @@ public class DeleteHandler extends InstructionHandler {
 
             fileManager.saveLibraryData(library.getBooks());
             System.out.println("Record deleted successfully.");
+            fileManager.logMessage("Record deleted successfully");
         } catch (Exception e) {
             System.err.println("Error processing 'delete' instruction: " + e.getMessage());
         }
